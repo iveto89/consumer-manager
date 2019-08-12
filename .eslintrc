@@ -1,9 +1,12 @@
 {
   "parserOptions": {
-  "ecmaVersion": 2017
-},
+    "ecmaVersion": 2017
+  },
   "extends": "vue",
   "env": {
-  "jest": true
-}
+    "jest": true
+  },
+  "globals": {
+    "confirm": true
+  }
 }
