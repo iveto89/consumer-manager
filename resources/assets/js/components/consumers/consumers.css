@@ -1,0 +1,42 @@
+.tableRow {
+  position: relative;
+}
+
+.cancelIcon {
+  position: absolute;
+  top: 17px;
+  right: 24px;
+  cursor: pointer;
+}
+
+.cancelIcon:after {
+  content: "\2715";
+}
+
+.tickIcon:before  {
+  content: '\2713';
+  display: inline-block;
+  padding: 0 6px 0 0;
+  color: #28a745;
+  position: absolute;
+  top: 17px;
+  right: 40px;
+  cursor: pointer;
+}
+
+.tick {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  -ms-transform: rotate(45deg); /* IE 9 */
+  -webkit-transform: rotate(45deg); /* Chrome, Safari, Opera */
+  transform: rotate(45deg);
+}
+
+.uppercase {
+  text-transform: uppercase;
+}
+
+.form-control {
+  box-shadow: none;
+}
