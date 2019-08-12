@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Consumer;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreConsumer;
 use Illuminate\Http\Request;
 
 class ConsumerController extends Controller
@@ -16,70 +17,35 @@ class ConsumerController extends Controller
     public function index()
     {
         $consumers = Consumer::all();
+
         return response()->json($consumers);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param StoreConsumer $request
+     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StoreConsumer $request)
     {
-        //
-    }
+        $consumer = Consumer::create($request->only(['name', 'age', 'city']));
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
+        return response($consumer, 200);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param StoreConsumer $request
+     * @param Consumer $consumer
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(StoreConsumer $request, Consumer $consumer)
     {
-        $this->validate($request, [
-            'name' => 'sometimes|required|string|min:4|max:40',
-            'age'  => 'sometimes|required|integer|min:14|max:99',
-            'city' => 'sometimes|required|in:Sofia,Plovdiv,Varna',
-        ]);
-
-        $consumer = Consumer::where('id', $id)->firstOrFail();
-
         $consumer->update($request->all());
+
         return response($consumer, 200);
     }
 
@@ -93,6 +59,7 @@ class ConsumerController extends Controller
     public function destroy(Request $request, Consumer $consumer)
     {
         $consumer->delete();
+
         return response('', 200);
     }
 }

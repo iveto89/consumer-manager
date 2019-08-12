@@ -6,6 +6,7 @@
           <div class="col-md-6">
             <input
               type="text"
+              :value="searchText"
               @keyup="searchConsumers($event.target.value)"
               placeholder="Search..."
               class="searchField form-control"/>
@@ -26,6 +27,9 @@
             </multiselect>
           </div>
         </div>
+        <p v-if="errors.name"><span class="error">{{errors.name}}</span></p>
+        <p v-if="errors.age"><span class="error">{{errors.age}}</span></p>
+        <p v-if="errors.city"><span class="error">{{errors.city}}</span></p>
 
         <div class="table-responsive">
           <table class="table table-bordered table-striped">
@@ -35,103 +39,102 @@
               <th>Name</th>
               <th>Age</th>
               <th>City</th>
-              <th>Actions</th>
+              <th width="30%">Actions</th>
             </tr>
             </thead>
             <tbody>
             <tr v-for="consumer, index in getFilteredConsumers">
               <td>{{ index + 1 }}</td>
-              <td class="tableRow" :class="{ 'text-success': consumer.age < 18, 'text-danger': consumer.age > 60 }">
+              <td class="tableColumn"
+                  :class="colorObject(consumer)">
                 <input
-                  v-if="isEditable('name', consumer)"
+                  v-if="isEditable('name', consumer, index)"
                   class="form-control"
+                  :class="{ 'error': errors.name}"
                   v-model="temp.name"
+                  v-focus="!isCreateMode(consumer)"
                   minlength="4"
                   maxlength="40"
                   spellcheck="false" />
-                <div v-if="isEditable('name', consumer)"
+                <div v-if="isEditMode('name', consumer)"
                    @click="updateField('name', consumer)"
                    class="tickIcon text-success"></div>
-                <span v-if="isEditable('name', consumer)"
-                  @click.prevent.stop="cancelUpdate('name', consumer)"
+                <span v-if="isEditMode('name', consumer)"
+                  @click="cancelUpdate('name', consumer)"
                   class="cancelIcon"
                   title="Cancel"></span>
                 <span
-                  v-else
-                  :class="{
-                    title: true,
-                    cursor: true,
-                    error: error
-                  }"
-                 @dblclick="editField('name', consumer)">{{ consumer.name }}</span>
+                  v-if="isShowMode('name', consumer)"
+                  @dblclick="editField('name', consumer)">{{ consumer.name }}</span>
               </td>
-              <td>
+              <td class="tableColumn">
                 <input
-                  v-if="isEditable('age', consumer)"
+                  v-if="isEditable('age', consumer, index)"
                   class="form-control"
-                  v-model="consumer.age"
+                  :class="{ 'error': errors.age}"
+                  v-focus="!isCreateMode(consumer)"
+                  v-model="temp.age"
                   minlength="14"
                   maxlength="99"
                   spellcheck="false" />
-                <div v-if="isEditable('age', consumer)"
+                <div v-if="isEditMode('age', consumer)"
                    @click="updateField('age', consumer)"
                    class="tickIcon text-success"></div>
-                <span v-if="isEditable('age', consumer)"
-                  @click.prevent.stop="updateField"
+                <span v-if="isEditMode('age', consumer)"
+                  @click="cancelUpdate('age', consumer)"
                   class="cancelIcon"
                   title="Cancel"></span>
                 <span
-                  v-else
-                  :class="{
-                    title: true,
-                    cursor: true,
-                    error: error
-                  }"
+                  v-if="isShowMode('age', consumer)"
                   @dblclick="editField('age', consumer)">{{ consumer.age }}</span>
               </td>
-              <td>
+              <td class="tableColumn">
                 <input
-                  v-if="isEditable('city', consumer)"
+                  v-if="isEditable('city', consumer, index)"
+                  v-focus="!isCreateMode(consumer)"
                   class="form-control"
-                  v-model="consumer.city"
+                  :class="{ 'error': errors.city}"
+                  v-model="temp.city"
                   minlength="14"
                   maxlength="99"
                   spellcheck="false" />
-                <div v-if="isEditable('city', consumer)"
+                <div v-if="isEditMode('city', consumer)"
                    @click="updateField('city', consumer)"
                    class="tickIcon text-success"></div>
-                <span v-if="isEditable('city', consumer)"
-                  @click.prevent.stop="updateField"
+                <span v-if="isEditMode('city', consumer)"
+                  @click="cancelUpdate('city', consumer)"
                   class="cancelIcon"
                   title="Cancel"></span>
                 <span
-                  v-else
-                  :class="{
-                    title: true,
-                    cursor: true,
-                    error: error
-                  }"
+                  v-if="isShowMode('city', consumer)"
                   @dblclick="editField('city', consumer)">{{ consumer.city }}</span>
               </td>
               <td>
-                <a href="javascript:;"
-                   class="btn btn-xs btn-danger"
+                <a href="javascript:void(0)"
+                   class="btn btn-xs btn-danger uppercase"
                    :disabled="busy"
-                   @click="deleteConsumer(consumer.id)">
+                   @click="deleteConsumer(index, consumer)">
                   Delete
+                </a>
+                <a v-if="isCreateMode(consumer)"
+                   href="javascript:;"
+                   class="btn btn-xs btn-success uppercase"
+                   :disabled="busy"
+                   @click="addConsumer(temp, index)">
+                  Save
                 </a>
               </td>
             </tr>
             <tr>
               <td></td>
-              <td class="uppercase">NAME</td>
-              <td class="uppercase">AGE</td>
-              <td class="uppercase">CITY</td>
+              <td class="uppercase">Name</td>
+              <td class="uppercase">Age</td>
+              <td class="uppercase">City</td>
               <td>
-                <a href="javascript:;"
-                  class="btn btn-xs btn-danger uppercase"
+                <a href="javascript:void(0)"
+                  class="btn btn-xs btn-success uppercase"
                   :disabled="busy"
-                  @click="addConsumer(consumer.id, index)">
+                  @click="addConsumer()">
                   Add user</a>
               </td>
             </tr>
@@ -146,6 +149,7 @@
 <script>
   import Multiselect from 'vue-multiselect'
   import axios from 'axios'
+  import { Focus } from '../directives/focus.js'
   import { createNamespacedHelpers } from 'vuex'
 
   const { mapState, mapGetters, mapActions } = createNamespacedHelpers('consumers')
@@ -153,15 +157,15 @@
   export default {
     data: function () {
       return {
-        sortBy: { id: 'idAsc', name: 'ID Asc' },
+        sortByDefault: { id: 'idAsc', name: 'ID Asc' },
         sortOptions: [
           { id: 'id-asc', name: 'ID Asc' },
           { id: 'id-desc', name: 'ID Desc' },
           { id: 'name-asc', name: 'Name Asc' },
           { id: 'name-desc', name: 'Name Desc' }
         ],
-        busy: null,
-        error: false
+        busy: false,
+        errors: []
       }
     },
     computed: {
@@ -169,11 +173,13 @@
         'searchText',
         'editModeField',
         'editedConsumer',
-        'temp'
+        'editMode',
+        'createMode',
+        'temp',
+        'filteredConsumers'
       ]),
       ...mapGetters([
-        'consumers',
-        'filteredConsumers'
+        'consumers'
       ]),
       getFilteredConsumers () {
         return this.filteredConsumers || this.consumers
@@ -182,60 +188,151 @@
     components: {
       Multiselect
     },
+    directives: {
+      Focus
+    },
     created () {
+      this.sortBy = this.sortByDefault
       this.getConsumers()
     },
     methods: {
       ...mapActions([
-        'getConsumers',
+        'setConsumers',
+        'createConsumer',
         'removeConsumer',
         'sortConsumers',
         'searchConsumers',
         'updateConsumer',
         'setEditMode',
-        'removeEditMode'
+        'removeEditMode',
+        'toggleCreateMode'
       ]),
-      sortData () {
-        this.sortConsumers(this.sortBy)
+      colorObject (consumer) {
+        return {
+          'text-success': consumer.age < 18,
+          'text-danger': consumer.age > 60
+        }
       },
-      deleteConsumer (id) {
-        // if (confirm('Are you sure want to delete it?')) { // eslint-disable-line guard-for-in
-        this.busy = true
-        axios.delete(`/api/v1/consumers/${id}`)
-          .then((resp) => {
-            this.removeConsumer(id)
-            this.busy = false
-          })
-          .catch(error => {
-            this.busy = false
-            console.error(error.error)
-          })
-        // }
-      },
-      isEditable (field, consumer) {
+      isEditable (field, consumer, index) {
+        if (this.isCreateMode(consumer)) {
+          return this.consumers[index] === consumer
+        }
         return this.editedConsumer === consumer && this.editModeField === field
+      },
+      isEditMode (field, consumer) {
+        return this.editMode && this.editedConsumer === consumer && this.editModeField === field
+      },
+      isCreateMode (consumer) {
+        return this.createMode && !consumer.id
+      },
+      isShowMode (field, consumer) {
+        return this.isEditMode(field, consumer) === false && this.isCreateMode(consumer) === false
       },
       editField (field, consumer) {
         this.setEditMode({ field, consumer })
       },
+      sortData () {
+        this.sortConsumers(this.sortBy)
+      },
+      getConsumers () {
+        axios.get('/api/v1/consumers')
+          .then(response => {
+            this.setConsumers(response.data)
+          })
+          .catch((error) => {
+            this.handleErrors(error.response.data)
+          })
+      },
+      deleteConsumer (index, consumer) {
+        this.errors = []
+        if (confirm('Are you sure want to delete it?')) {
+          this.busy = true
+          if (!consumer.id) {
+            this.removeConsumer(index)
+            this.busy = false
+            return
+          }
+
+          axios.delete(`/api/v1/consumers/${consumer.id}`)
+            .then((resp) => {
+              this.removeConsumer(index)
+              this.busy = false
+            })
+            .catch(error => {
+              this.busy = false
+              this.handleErrors(error.response.data)
+            })
+        }
+      },
+      addConsumer (consumer, index) {
+        if (!consumer) {
+          consumer = {
+            name: '',
+            age: null,
+            city: ''
+          }
+          this.toggleCreateMode(true)
+          this.searchConsumers('')
+          this.createConsumer(consumer)
+
+          this.sortBy = this.sortByDefault
+          this.sortData()
+          return
+        }
+
+        this.storeConsumer(consumer, index)
+      },
+      storeConsumer (consumer, index) {
+        this.errors = []
+        this.busy = true
+
+        const payload = {
+          name: consumer.name,
+          age: consumer.age,
+          city: consumer.city
+        }
+
+        return axios
+          .post(`/api/v1/consumers`, payload)
+          .then((response) => {
+            this.busy = false
+            this.updateConsumer({ consumer: response.data, index })
+            this.toggleCreateMode(false)
+          })
+          .catch(error => {
+            this.busy = false
+            this.handleErrors(error.response.data)
+          })
+      },
       updateField (field, consumer) {
+        this.errors = []
         this.busy = true
         const payload = {
           [field]: this.temp[field]
         }
-        axios.put(`/api/v1/consumers/${consumer.id}`, payload)
-          .then((response) => {
-            this.busy = false
-            this.updateConsumer(response.data)
-            this.removeEditMode(field, response.data)
-          })
-          .catch(error => {
-            this.busy = false
-            console.error(error.error)
-          })
+
+        if (consumer.id) {
+          return axios.put(`/api/v1/consumers/${consumer.id}`, payload)
+            .then((response) => {
+              this.busy = false
+              this.updateConsumer({ consumer: response.data })
+              this.removeEditMode(field, response.data)
+            })
+            .catch(error => {
+              this.busy = false
+              this.handleErrors(error.response.data)
+            })
+        }
       },
       cancelUpdate (field, consumer) {
         this.removeEditMode(field, consumer)
+      },
+      handleErrors (errors) {
+        if (errors.hasOwnProperty('errors')) {
+          Object.keys(errors.errors).forEach((key) => {
+            this.errors[key] = errors.errors[key][0]
+          })
+        }
       }
     }
   }

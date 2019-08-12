@@ -1,4 +1,4 @@
-.tableRow {
+.tableColumn {
   position: relative;
 }
 
@@ -38,5 +38,18 @@
 }
 
 .form-control {
+  box-shadow: none;
+}
+
+input.error {
+  border-color: red;
+}
+
+span.error {
+  color: red;
+}
+
+.btn-danger:focus, .btn-danger.focus,
+.btn-success:focus, .btn-success.focus{
   box-shadow: none;
 }
