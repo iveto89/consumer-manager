@@ -175,11 +175,11 @@
         'editedConsumer',
         'editMode',
         'createMode',
-        'temp',
-        'filteredConsumers'
+        'temp'
       ]),
       ...mapGetters([
-        'consumers'
+        'consumers',
+        'filteredConsumers'
       ]),
       getFilteredConsumers () {
         return this.filteredConsumers || this.consumers
@@ -340,5 +340,4 @@
 
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 <style src="./consumers.css"></style>
-<!--<style module lang="less" src="./consumers.less"></style>-->
 
