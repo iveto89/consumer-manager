@@ -3,5 +3,6 @@ export default {
   filteredConsumers: null,
   editModeField: null,
   editedConsumer: null,
-  temp: []
+  temp: [],
+  searchText: null
 }

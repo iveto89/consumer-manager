@@ -14,8 +14,11 @@ export default {
   sortConsumers ({ state, commit }, sortBy) {
     commit('SORT_CONSUMERS', sortBy)
   },
-  searchConsumers ({ state, commit }, searchText) {
-    commit('SEARCH_CONSUMERS', searchText)
+  setSearchText ({ state, commit }, searchText) {
+    commit('SET_SEARCH_TEXT', searchText)
+  },
+  searchConsumers ({ state, commit }) {
+    commit('SEARCH_CONSUMERS')
   },
   updateConsumer ({ state, commit }, consumer) {
     commit('UPDATE_CONSUMER', consumer)

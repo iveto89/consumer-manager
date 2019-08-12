@@ -6,7 +6,7 @@
           <div class="col-md-6">
             <input
               type="text"
-              @keyup="searchConsumers($event.target.value)"
+              @keyup="search"
               placeholder="Search..."
               class="searchField form-control"/>
           </div>
@@ -193,24 +193,29 @@
         'searchConsumers',
         'updateConsumer',
         'setEditMode',
-        'removeEditMode'
+        'removeEditMode',
+        'setSearchText'
       ]),
       sortData () {
         this.sortConsumers(this.sortBy)
       },
+      search (element) {
+        this.setSearchText(element.target.value)
+        this.searchConsumers()
+      },
       deleteConsumer (id) {
-        // if (confirm('Are you sure want to delete it?')) { // eslint-disable-line guard-for-in
-        this.busy = true
-        axios.delete(`/api/v1/consumers/${id}`)
-          .then((resp) => {
-            this.removeConsumer(id)
-            this.busy = false
-          })
-          .catch(error => {
-            this.busy = false
-            console.error(error.error)
-          })
-        // }
+        if (confirm('Are you sure want to delete it?')) {
+          this.busy = true
+          axios.delete(`/api/v1/consumers/${id}`)
+            .then((resp) => {
+              this.removeConsumer(id)
+              this.busy = false
+            })
+            .catch(error => {
+              this.busy = false
+              console.error(error.error)
+            })
+        }
       },
       isEditable (field, consumer) {
         return this.editedConsumer === consumer && this.editModeField === field
@@ -228,6 +233,8 @@
             this.busy = false
             this.updateConsumer(response.data)
             this.removeEditMode(field, response.data)
+            this.sortData()
+            this.searchConsumers()
           })
           .catch(error => {
             this.busy = false

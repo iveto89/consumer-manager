@@ -22,8 +22,11 @@ export default {
       }
     })
   },
-  SEARCH_CONSUMERS (state, searchText) {
-    const searchTextTrimmed = searchText.trimStart()
+  SET_SEARCH_TEXT (state, searchText) {
+    state.searchText = searchText
+  },
+  SEARCH_CONSUMERS (state) {
+    const searchTextTrimmed = state.searchText.trimStart()
     state.filteredConsumers = [
       ...state.consumers.filter(consumer => {
         return consumer.name.toLowerCase().startsWith(searchTextTrimmed.toLowerCase()) ||
