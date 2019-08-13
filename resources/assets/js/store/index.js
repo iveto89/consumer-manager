@@ -5,5 +5,6 @@ import consumers from './modules/consumers'
 Vue.use(Vuex)
 
 export default new Vuex.Store({
-  modules: { consumers }
+  modules: { consumers },
+  strict: process.env.NODE_ENV !== 'production'
 })

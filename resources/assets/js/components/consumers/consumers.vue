@@ -6,8 +6,7 @@
           <div class="col-md-6">
             <input
               type="text"
-              :value="searchText"
-              @keyup="searchConsumers($event.target.value)"
+              v-model="searchText"
               placeholder="Search..."
               class="searchField form-control"/>
           </div>
@@ -43,7 +42,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr v-for="consumer, index in getFilteredConsumers">
+            <tr v-for="consumer, index in filteredConsumers">
               <td>{{ index + 1 }}</td>
               <td class="tableColumn"
                   :class="colorObject(consumer)">
@@ -117,10 +116,10 @@
                   Delete
                 </a>
                 <a v-if="isCreateMode(consumer)"
-                   href="javascript:;"
+                   href="javascript:void(0)"
                    class="btn btn-xs btn-success uppercase"
                    :disabled="busy"
-                   @click="addConsumer(temp, index)">
+                   @click="addConsumer(temp)">
                   Save
                 </a>
               </td>
@@ -170,19 +169,24 @@
     },
     computed: {
       ...mapState([
-        'searchText',
         'editModeField',
         'editedConsumer',
         'editMode',
         'createMode',
-        'temp'
+        'temp',
+        'consumers',
+        'createdConsumerIndex'
       ]),
       ...mapGetters([
-        'consumers',
         'filteredConsumers'
       ]),
-      getFilteredConsumers () {
-        return this.filteredConsumers || this.consumers
+      searchText: {
+        get () {
+          return this.$store.state.consumers.searchText
+        },
+        set (value) {
+          this.$store.commit('consumers/UPDATE_SEARCH_TEXT', value)
+        }
       }
     },
     components: {
@@ -201,11 +205,11 @@
         'createConsumer',
         'removeConsumer',
         'sortConsumers',
-        'searchConsumers',
         'updateConsumer',
         'setEditMode',
         'removeEditMode',
-        'toggleCreateMode'
+        'toggleCreateMode',
+        'updateSearchText'
       ]),
       colorObject (consumer) {
         return {
@@ -215,7 +219,7 @@
       },
       isEditable (field, consumer, index) {
         if (this.isCreateMode(consumer)) {
-          return this.consumers[index] === consumer
+          return this.filteredConsumers[index] === consumer
         }
         return this.editedConsumer === consumer && this.editModeField === field
       },
@@ -264,7 +268,7 @@
             })
         }
       },
-      addConsumer (consumer, index) {
+      addConsumer (consumer) {
         if (!consumer) {
           consumer = {
             name: '',
@@ -272,17 +276,13 @@
             city: ''
           }
           this.toggleCreateMode(true)
-          this.searchConsumers('')
           this.createConsumer(consumer)
-
-          this.sortBy = this.sortByDefault
-          this.sortData()
           return
         }
 
-        this.storeConsumer(consumer, index)
+        this.storeConsumer(consumer)
       },
-      storeConsumer (consumer, index) {
+      storeConsumer (consumer) {
         this.errors = []
         this.busy = true
 
@@ -296,6 +296,11 @@
           .post(`/api/v1/consumers`, payload)
           .then((response) => {
             this.busy = false
+            this.updateSearchText('')
+            this.sortBy = this.sortByDefault
+            this.sortData()
+
+            const index = this.filteredConsumers.length - 1
             this.updateConsumer({ consumer: response.data, index })
             this.toggleCreateMode(false)
           })

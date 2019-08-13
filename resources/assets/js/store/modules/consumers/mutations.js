@@ -51,24 +51,7 @@ export default {
       }
     })
   },
-  SET_SEARCH_TEXT (state, searchText) {
+  UPDATE_SEARCH_TEXT (state, searchText) {
     state.searchText = searchText
-  },
-  SEARCH_CONSUMERS (state) {
-    const searchTextTrimmed = state.searchText.trimStart()
-
-    const consumers = [
-      ...state.consumers.filter(consumer => {
-        return consumer.name && consumer.name.toLowerCase().startsWith(searchTextTrimmed.toLowerCase()) ||
-          consumer.city && consumer.city.toLowerCase().startsWith(searchTextTrimmed.toLowerCase()) ||
-          consumer.age && consumer.age.toString().startsWith(searchTextTrimmed)
-      })
-    ]
-    if (searchTextTrimmed) {
-      state.filteredConsumers = consumers
-    } else {
-      state.consumers = consumers
-      state.filteredConsumers = null
-    }
   }
 }
