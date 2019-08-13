@@ -5,7 +5,11 @@ export default {
   CREATE_CONSUMER (state, consumer) {
     state.consumers.push(consumer)
   },
-  REMOVE_CONSUMER (state, index) {
+  REMOVE_CONSUMER (state, { index, id }) {
+    if (index) {
+      state.consumers.splice(index, 1)
+    }
+    index = state.consumers.findIndex(c => c.id === id)
     state.consumers.splice(index, 1)
   },
   UPDATE_CONSUMER (state, { consumer, index }) {
@@ -32,6 +36,9 @@ export default {
   },
   TOGGLE_CREATE_MODE (state, createMode) {
     state.createMode = createMode
+  },
+  UPDATE_INPUT_FILED (state, { index, field, value }) {
+    state.consumers[index][field] = value
   },
   SORT_CONSUMERS (state, sortByObject) {
     const sortBy = sortByObject.id.split('-')

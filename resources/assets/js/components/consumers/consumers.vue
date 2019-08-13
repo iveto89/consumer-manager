@@ -259,7 +259,7 @@
 
           axios.delete(`/api/v1/consumers/${consumer.id}`)
             .then((resp) => {
-              this.removeConsumer(index)
+              this.removeConsumer({ index: null, id: consumer.id })
               this.busy = false
             })
             .catch(error => {

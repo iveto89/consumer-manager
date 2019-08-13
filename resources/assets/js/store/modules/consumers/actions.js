@@ -6,8 +6,8 @@ export default {
     commit('CREATE_CONSUMER', consumer)
     dispatch('setTempObject', { name: '', age: null, city: '' })
   },
-  removeConsumer ({ state, commit }, index) {
-    commit('REMOVE_CONSUMER', index)
+  removeConsumer ({ state, commit }, { index, id }) {
+    commit('REMOVE_CONSUMER', { index, id })
   },
   updateConsumer ({ state, commit }, { consumer, index }) {
     commit('UPDATE_CONSUMER', { consumer, index })
