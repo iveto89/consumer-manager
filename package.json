@@ -17,7 +17,7 @@
     "eslint": "^3.18.0",
     "eslint-config-vue": "^2.0.2",
     "eslint-plugin-vue": "^2.0.1",
-    "jquery": "^3.2",
+    "jquery": "^3.5",
     "laravel-mix": "^2.0",
     "less": "^3.9.0",
     "less-loader": "^5.0.0",
